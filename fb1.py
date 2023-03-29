@@ -3,40 +3,8 @@ Download comments for a public Facebook post.
 """
 import facebook_scraper as fs
 import csv
-import time
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.options import Options
-
-chrome_options = webdriver.ChromeOptions()
-chrome_options.add_argument('--headless')
-chrome_options.add_argument('--no-sandbox')
-chrome_options.add_argument('--disable-dev-shm-usage')
-#driver.get('https://www.hardwarezone.com.sg/search/forum/Bivalent')
-# Initialize the Chrome webdriver using WebDriver Manager
-#driver = webdriver.Chrome(ChromeDriverManager().install())
-driver = webdriver.Chrome('chromedriver',options=chrome_options)
-
-
-# Navigate to the Facebook login page
-driver.get('https://www.facebook.com/')
-
-# Find the email and password fields and enter your login credentials
-email = driver.find_element(
-        By.NAME, 'email')
-email.send_keys('is459g1t8@gmail.com')
-password = driver.find_element(
-        By.NAME, 'pass')
-password.send_keys('qwer1234!')
-
-# Press the Enter key to submit the login form
-password.send_keys(Keys.ENTER)
-
-# Wait for the login to complete
-time.sleep(5)
+import boto3
+from io import BytesIO
 
 # get POST_ID from the URL of the post which can have the following structure:
 # https://www.facebook.com/USER/posts/POST_ID
@@ -50,7 +18,8 @@ MAX_COMMENTS = 200
 # get the post (this gives a generator)
 gen = fs.get_posts(
     post_urls=[POST_ID],
-    options={"comments": MAX_COMMENTS, "progress": True}
+    options={"comments": MAX_COMMENTS, "progress": True},
+    credentials=('is459g1t8@gmail.com' ,"qwer1234!")
 )
 
 # take 1st element of the generator which is the post we requested
@@ -67,9 +36,16 @@ writer.writerow(['comment_id','comment_url',	'commenter_id',	'commenter_url','co
 for dictionary in comments:
     writer.writerow(dictionary.values())
 myFile.close()
-myFile = open('firstcovidnews.csv', 'r')
-myFile.close()
-    
+#myFile = open('firstcovidnews.csv', 'r')
+#myFile.close()
+
+with open('firstcovidnews.csv', 'rb') as file:
+    csv_file = BytesIO(file.read())
+
+s3 = boto3.resource('s3')
+bucket_name = 'is459-g1t8-project'  # replace this with your S3 bucket name
+object_key = 'input/firstcovidnews.csv'  # the key under which the object will be stored in the S3 bucket
+s3.Bucket(bucket_name).upload_fileobj(csv_file, object_key)
 
 #     # e.g. ...get the replies for them
 #     for reply in comment['replies']:

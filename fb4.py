@@ -3,6 +3,8 @@ Download comments for a public Facebook post.
 """
 import facebook_scraper as fs
 import csv
+import boto3
+from io import BytesIO
 
 # get POST_ID from the URL of the post which can have the following structure:
 # https://www.facebook.com/USER/posts/POST_ID
@@ -16,7 +18,8 @@ MAX_COMMENTS = 100
 # get the post (this gives a generator)
 gen = fs.get_posts(
     post_urls=[POST_ID],
-    options={"comments": MAX_COMMENTS, "progress": True}
+    options={"comments": MAX_COMMENTS, "progress": True},
+    credentials=('is459g1t8@gmail.com' ,"qwer1234!")
 )
 
 # take 1st element of the generator which is the post we requested
@@ -33,9 +36,16 @@ writer.writerow(['comment_id','comment_url',	'commenter_id',	'commenter_url','co
 for dictionary in comments:
     writer.writerow(dictionary.values())
 myFile.close()
-myFile = open('4covidnews.csv', 'r')
-myFile.close()
-    
+#myFile = open('4covidnews.csv', 'r')
+#myFile.close()
+
+with open('4covidnews.csv', 'rb') as file:
+    csv_file = BytesIO(file.read())
+
+s3 = boto3.resource('s3')
+bucket_name = 'is459-g1t8-project'  # replace this with your S3 bucket name
+object_key = 'input/4covidnews.csv'  # the key under which the object will be stored in the S3 bucket
+s3.Bucket(bucket_name).upload_fileobj(csv_file, object_key)
 
 #     # e.g. ...get the replies for them
 #     for reply in comment['replies']:
