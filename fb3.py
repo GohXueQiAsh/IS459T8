@@ -30,7 +30,7 @@ comments = post['comments_full']
 
 # process comments as you want...
 
-myFile = open('3covidnews.csv', 'w')
+myFile = open('3covidnews.csv', 'w', encoding='utf-8')
 writer = csv.writer(myFile)
 writer.writerow(['comment_id','comment_url',	'commenter_id',	'commenter_url','commenter_name' ,'commenter_meta','comment_text','comment_time',	'comment_image','comment_reactors',	'comment_reactions','comment_reaction_count','replies'])
 for dictionary in comments:
