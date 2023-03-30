@@ -5,11 +5,17 @@ import facebook_scraper as fs
 import csv
 import boto3
 from io import BytesIO
-
+import time
+import schedule
+import datetime
 # get POST_ID from the URL of the post which can have the following structure:
 # https://www.facebook.com/USER/posts/POST_ID
 # https://www.facebook.com/groups/GROUP_ID/posts/POST_ID
 # https://www.facebook.com/sghealthministry/posts/are-you-armed-with-a-booster-shot-yet-from-14-feb-2022-a-booster-shot-is-necessa/320010360154394/
+# def download_and_upload_comments():
+#     today = datetime.datetime.today()
+#     if today.day == 31:
+        
 POST_ID = "320010360154394"
 
 # number of comments to download -- set this to True to download all comments
@@ -46,7 +52,14 @@ s3 = boto3.resource('s3')
 bucket_name = 'is459-g1t8-project'  # replace this with your S3 bucket name
 object_key = 'input/2covidnews.csv'  # the key under which the object will be stored in the S3 bucket
 s3.Bucket(bucket_name).upload_fileobj(csv_file, object_key)
-    
+
+# schedule the job to run once every day at a specific time
+# schedule.every().day.at('12:00').do(download_and_upload_comments)
+
+# # run the scheduled job
+# while True:
+#     schedule.run_pending()
+#     time.sleep(1)
 
 #     # e.g. ...get the replies for them
 #     for reply in comment['replies']:

@@ -12,8 +12,13 @@ import datetime as dt
 from webdriver_manager.chrome import ChromeDriverManager
 import boto3
 from io import BytesIO
+import schedule
+import datetime
 
-s3 = boto3.client('s3')
+
+# def download_and_upload_comments():
+#     today = datetime.datetime.today()
+#     if today.day == 31:
 
 chrome_options = webdriver.ChromeOptions()
 chrome_options.add_argument('--headless')
@@ -48,10 +53,10 @@ source_path = "https://old.reddit.com/search?q=singapore+bivalent"
 url_list = scrape_url(source_path)
 
 reddit = praw.Reddit(client_id='', \
-                     client_secret='', \
-                     user_agent='', \
-                     username='', \
-                     password='')
+                    client_secret='', \
+                    user_agent='', \
+                    username='', \
+                    password='')
 
 topics_dict = { "author": [],
                 "submission" : [],
@@ -91,5 +96,13 @@ csv_file = BytesIO(csv_buffer)
 
 s3 = boto3.resource('s3')
 bucket_name = 'is459-g1t8-project'  # replace this with your S3 bucket name
-object_key = 'input/Reddit.csv'  # the key under which the object will be stored in the S3 bucket
+object_key = 'input/reddit.csv'  # the key under which the object will be stored in the S3 bucket
 s3.Bucket(bucket_name).upload_fileobj(csv_file, object_key)
+
+# # schedule the job to run once every day at a specific time
+# schedule.every().day.at(':00').do(download_and_upload_comments)
+
+# # run the scheduled job
+# while True:
+#     schedule.run_pending()
+#     time.sleep(1)
