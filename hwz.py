@@ -5,7 +5,7 @@ from scrapingbee import ScrapingBeeClient
 from bs4 import BeautifulSoup
 import time
 import schedule
-import datetime
+import datetime as dt
 from urllib.request import Request, urlopen
 
 import requests
@@ -82,8 +82,10 @@ def scraper(discussion, url, firstPage):
         extracted_date = date_message.find(class_="u-dt")
         if extracted_date == None:
             data_dictionary["date"].append(date)
-        else:
-            data_dictionary["date"].append(extracted_date.text)
+        else:    
+            date_obj = dt.datetime.strptime(extracted_date.text, '%b %d, %Y')
+            formatted_date = date_obj.strftime('%b %Y')
+            data_dictionary["date"].append(formatted_date)
             
     
     
@@ -122,12 +124,12 @@ hwz_df = pd.DataFrame.from_dict(hwz_dict)
 hwz_df['body'] = hwz_df['body'].replace('', np.nan)
 hwz_df = hwz_df.dropna()
 
-csv_buffer = hwz_df.to_csv(index=False).encode()
+csv_buffer = hwz_df.to_json(orient='records').encode()
 csv_file = BytesIO(csv_buffer)
 
 s3 = boto3.resource('s3')
 bucket_name = 'is459-g1t8-project'  # replace this with your S3 bucket name
-object_key = 'input/hwz.csv'  # the key under which the object will be stored in the S3 bucket
+object_key = 'input/hwz.json'  # the key under which the object will be stored in the S3 bucket
 s3.Bucket(bucket_name).upload_fileobj(csv_file, object_key)
 
 
@@ -139,6 +141,3 @@ s3.Bucket(bucket_name).upload_fileobj(csv_file, object_key)
 # while True:
 #     schedule.run_pending()
 #     time.sleep(1)
-
-
-
