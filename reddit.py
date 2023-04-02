@@ -52,35 +52,34 @@ def scrape_url(source_path):
 source_path = "https://old.reddit.com/search?q=singapore+bivalent"
 url_list = scrape_url(source_path)
 
-reddit = praw.Reddit(client_id='', \
-                    client_secret='', \
-                    user_agent='', \
-                    username='', \
-                    password='')
+reddit = praw.Reddit(client_id='mJbADheDuoEGGyzAikqpjg', \
+                     client_secret='I6HIbyDxeP7Zy0BkpYKkZ1m84lSR5A', \
+                     user_agent='IS434_Jerald_Leong', \
+                     username='Responsible_Round877', \
+                     password='J3R@ld0825')
 
 topics_dict = { "author": [],
-                "submission" : [],
                 "body": [],
                 "score": [],
-                "id": [],
-                "parent_id": [],
-                "created": []}
+                "date": [],
+                "source": []}
 
 def get_date(created):
-    return dt.datetime.fromtimestamp(created)
+    original_date = dt.datetime.fromtimestamp(created)
+    formatted_date = original_date.strftime("%b %Y")
+    return formatted_date
 
 def process_topic_data(submission):
     comments = []
     submission.comments.replace_more(limit=None)
     for comment in submission.comments.list():
-        timestamp = get_date(comment.created)
-        topics_dict["author"].append(comment.author)
-        topics_dict["submission"].append(comment.submission)
-        topics_dict["body"].append(comment.body)
-        topics_dict["score"].append(comment.score)
-        topics_dict["id"].append(comment.id)
-        topics_dict["parent_id"].append(comment.parent_id)
-        topics_dict["created"].append(timestamp)
+        if comment.body != "[removed]":
+            timestamp = get_date(comment.created)
+            topics_dict["author"].append(str(comment.author))
+            topics_dict["body"].append(comment.body)
+            topics_dict["score"].append(comment.score)
+            topics_dict["date"].append(timestamp)
+            topics_dict["source"].append("reddit")
     return comments
 
 for link in url_list:
@@ -91,12 +90,12 @@ topics_data = pd.DataFrame(topics_dict)
 
 topics_data = topics_data.dropna()
 
-csv_buffer = topics_data.to_csv(index=False).encode()
+csv_buffer = topics_data.to_json(orient='records').encode()
 csv_file = BytesIO(csv_buffer)
 
 s3 = boto3.resource('s3')
 bucket_name = 'is459-g1t8-project'  # replace this with your S3 bucket name
-object_key = 'input/reddit.csv'  # the key under which the object will be stored in the S3 bucket
+object_key = 'input/reddit.json'  # the key under which the object will be stored in the S3 bucket
 s3.Bucket(bucket_name).upload_fileobj(csv_file, object_key)
 
 # # schedule the job to run once every day at a specific time
