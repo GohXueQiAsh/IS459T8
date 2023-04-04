@@ -94,8 +94,8 @@ csv_buffer = topics_data.to_json(orient='records').encode()
 csv_file = BytesIO(csv_buffer)
 
 s3 = boto3.resource('s3')
-bucket_name = 'is459-g1t8-project'  # replace this with your S3 bucket name
-object_key = 'input/reddit.json'  # the key under which the object will be stored in the S3 bucket
+bucket_name = 'raw--data-is459'  # replace this with your S3 bucket name
+object_key = 'read/reddit.json'  # the key under which the object will be stored in the S3 bucket
 s3.Bucket(bucket_name).upload_fileobj(csv_file, object_key)
 
 # # schedule the job to run once every day at a specific time
