@@ -26,7 +26,7 @@ MAX_COMMENTS = 100
 gen = fs.get_posts(
     post_urls=[POST_ID],
     options={"comments": MAX_COMMENTS, "progress": True},
-    credentials=('is459g1t8@gmail.com' ,"qwer1234!")
+    credentials=('is459g1t8@gmail.com' ,"qwer1234@")
 )
 
 # take 1st element of the generator which is the post we requested
@@ -50,10 +50,9 @@ with open('fb4.json', 'rb') as file:
     json_file = BytesIO(file.read())
 
 s3 = boto3.resource('s3')
-bucket_name = 'is459-g1t8-project'  # replace this with your S3 bucket name
+bucket_name = 'raw--data-is459'  # replace this with your S3 bucket name
 object_key = 'read/fb4.json'  # the key under which the object will be stored in the S3 bucket
 s3.Bucket(bucket_name).upload_fileobj(json_file, object_key)
-
 
 # schedule.every().day.at('12:00').do(download_and_upload_comments)
 

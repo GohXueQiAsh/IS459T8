@@ -1,11 +1,13 @@
 """
 Download comments for a public Facebook post.
 """
-import os
 import facebook_scraper as fs
 import csv
-import numpy as np
-
+import boto3
+from io import BytesIO
+import time
+import schedule
+import datetime
 import pandas as pd
 
 # get POST_ID from the URL of the post which can have the following structure:
@@ -20,7 +22,8 @@ MAX_COMMENTS = 200
 # get the post (this gives a generator)
 gen = fs.get_posts(
     post_urls=[POST_ID],
-    options={"comments": MAX_COMMENTS, "progress": True}
+    options={"comments": MAX_COMMENTS, "progress": True},
+    credentials=('is459g1t8@gmail.com' ,"qwer1234@")
 )
 
 # take 1st element of the generator which is the post we requested
@@ -43,6 +46,18 @@ with open('fb1.json', 'rb') as file:
     json_file = BytesIO(file.read())
 
 s3 = boto3.resource('s3')
-bucket_name = 'is459-g1t8-project'  # replace this with your S3 bucket name
+bucket_name = 'raw--data-is459'  # replace this with your S3 bucket name
 object_key = 'read/fb1.json'  # the key under which the object will be stored in the S3 bucket
 s3.Bucket(bucket_name).upload_fileobj(json_file, object_key)
+
+#     # e.g. ...get the replies for them
+#     for reply in comment['replies']:
+#         print(' ', reply)
+
+# # schedule the job to run once every day at a specific time
+# schedule.every().day.at('12:00').do(download_and_upload_comments)
+
+# # run the scheduled job
+# while True:
+#     schedule.run_pending()
+#     time.sleep(1)
