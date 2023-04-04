@@ -1,11 +1,13 @@
 """
 Download comments for a public Facebook post.
 """
-import os
 import facebook_scraper as fs
 import csv
-import numpy as np
-
+import boto3
+from io import BytesIO
+import time
+import schedule
+import datetime
 import pandas as pd
 
 # get POST_ID from the URL of the post which can have the following structure:
